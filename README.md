@@ -30,6 +30,8 @@ incluye:
 - Modelos Isar para tareas, sesiones Pomodoro, árboles, eventos de calendario y
   límites de uso.
 - Servicio inicial de almacenamiento seguro para claves de cifrado.
+- Cliente inicial de Google Calendar para crear bloques de enfoque mediante
+  autenticación OAuth.
 - Pruebas iniciales y configuración para continuar ampliando la cobertura.
 
 La interfaz visible todavía es mínima y algunas capas representan la base
@@ -76,7 +78,7 @@ flutter doctor
 ## Instalación y ejecución local
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone https://github.com/bobjk123/focus_wellbeing_app.git
 cd focus_wellbeing_app
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
@@ -85,6 +87,14 @@ flutter run
 
 Estas instrucciones sirven para explorar el estado actual del prototipo; no
 representan todavía un proceso de instalación para usuarios finales.
+
+### Google Calendar
+
+La integración actual solicita iniciar sesión con Google y utiliza únicamente
+el permiso de eventos de calendario (`calendar.events`) para crear bloques de
+enfoque en el calendario principal. La experiencia de permisos, la
+configuración OAuth por plataforma y el manejo completo de errores siguen en
+desarrollo. No se debe asumir que la integración está lista para producción.
 
 Para ejecutar el análisis estático y las pruebas:
 
@@ -149,7 +159,8 @@ personales en commits o issues. La política de reporte responsable está en
 
 La presencia de un servicio de claves seguras no significa que todas las rutas
 de persistencia estén cifradas todavía; esa integración forma parte del
-desarrollo pendiente.
+desarrollo pendiente. Del mismo modo, Google Calendar solo se utiliza cuando
+la persona usuaria inicia sesión y concede el permiso solicitado.
 
 ## Licencia
 

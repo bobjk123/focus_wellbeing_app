@@ -1,5 +1,6 @@
 // lib/injection_container.dart
 
+import 'package:focus_wellbeing_app/core/network/google_calendar_client.dart';
 import 'package:focus_wellbeing_app/features/focus_pomodoro/domain/usescases/complete_pomodoro_session_usecase.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar/isar.dart';
@@ -16,14 +17,17 @@ Future<void> initServiceLocator(Isar isarInstance) async {
   // 1. Instancia compartida de Isar DB
   sl.registerLazySingleton<Isar>(() => isarInstance);
 
-  // 2. DataSources
+  // Client HTTP de Google Calendar
+  sl.registerLazySingleton<GoogleCalendarClient>(() => GoogleCalendarClient());
+
+  // DataSources
   sl.registerLazySingleton<PomodoroLocalDataSource>(
     () => PomodoroLocalDataSourceImpl(sl()),
   );
   sl.registerLazySingleton<CalendarRemoteDataSource>(
-    () => CalendarRemoteDataSourceImpl(),
+    () =>
+        CalendarRemoteDataSourceImpl(sl()), // Recibe sl<GoogleCalendarClient>()
   );
-
   // 3. Repositorios
   sl.registerLazySingleton<PomodoroRepository>(
     () => PomodoroRepositoryImpl(

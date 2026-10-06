@@ -8,6 +8,12 @@ versión que recibe correcciones de seguridad. Las funciones de cifrado y
 almacenamiento seguro están en desarrollo y su presencia no implica que toda la
 información persistida esté cifrada.
 
+La integración de Google Calendar utiliza OAuth y solicita el scope
+`calendar.events`, limitado a la gestión de eventos. El flujo de autenticación
+y la configuración de credenciales por plataforma siguen siendo
+experimentales; no incluyas secretos OAuth, client secrets ni tokens en el
+repositorio.
+
 ## Reportar una vulnerabilidad
 
 No abras un issue público para una vulnerabilidad. Usa la función privada

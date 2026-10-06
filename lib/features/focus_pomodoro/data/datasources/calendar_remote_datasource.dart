@@ -1,5 +1,7 @@
 // lib/features/focus_pomodoro/data/datasources/calendar_remote_datasource.dart
 
+import '../../../../core/network/google_calendar_client.dart';
+
 abstract class CalendarRemoteDataSource {
   Future<String> createTimeBlockEvent({
     required String title,
@@ -10,7 +12,10 @@ abstract class CalendarRemoteDataSource {
 }
 
 class CalendarRemoteDataSourceImpl implements CalendarRemoteDataSource {
-  // Aquí se integraría la llamada directa con el paquete googleapis (Google Calendar REST API)
+  final GoogleCalendarClient calendarClient;
+
+  CalendarRemoteDataSourceImpl(this.calendarClient);
+
   @override
   Future<String> createTimeBlockEvent({
     required String title,
@@ -18,8 +23,11 @@ class CalendarRemoteDataSourceImpl implements CalendarRemoteDataSource {
     required DateTime endTime,
     required String description,
   }) async {
-    // Simulación de respuesta exitosa desde la API de Google
-    await Future.delayed(const Duration(milliseconds: 800));
-    return 'gcal_event_${DateTime.now().millisecondsSinceEpoch}';
+    return await calendarClient.createFocusTimeBlock(
+      title: title,
+      startTime: startTime,
+      endTime: endTime,
+      description: description,
+    );
   }
 }

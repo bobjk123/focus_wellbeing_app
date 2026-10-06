@@ -14,6 +14,8 @@ recopilación de datos innecesaria.
 - Para cambios grandes, abre primero un issue para acordar el enfoque.
 - No publiques credenciales, tokens, datos personales ni capturas con
   información privada.
+- No incluyas client secrets, tokens OAuth ni credenciales de Google Calendar;
+  utiliza configuración local fuera del control de versiones.
 - No presentes una funcionalidad experimental como terminada; documenta
   explícitamente sus limitaciones.
 
