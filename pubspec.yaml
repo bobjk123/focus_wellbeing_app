@@ -1,0 +1,39 @@
+name: focus_wellbeing_app
+description: Aplicación de productividad, bienestar digital e IA ética.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Arquitectura y Gestión de Estado
+  flutter_bloc: ^8.1.3
+  get_it: ^7.6.7
+
+  # Base de Datos Local y Cifrado
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  flutter_secure_storage: ^9.0.0
+  crypto: ^3.0.3
+
+  # Sincronización y Red
+  googleapis: ^13.1.0
+  google_sign_in: ^6.2.1
+  http: ^1.2.0
+
+  # Iconos
+  cupertino_icons: ^1.0.6
+  path_provider: ^2.1.6
+  flutter_test:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^3.0.0
+
+  # Generadores de Código
+  isar_generator: ^3.1.0+1
+  build_runner: ^2.4.8
