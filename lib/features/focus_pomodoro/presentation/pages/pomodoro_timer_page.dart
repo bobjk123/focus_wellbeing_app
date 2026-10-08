@@ -163,9 +163,10 @@ class _PomodoroTimerPageState extends State<PomodoroTimerPage> {
                           onChanged: _isRunning
                               ? null
                               : (value) {
-                                  if (value != null)
+                                  if (value != null) {
                                     setState(
                                         () => _selectedTreeSpecies = value);
+                                  }
                                 },
                         ),
                       ],

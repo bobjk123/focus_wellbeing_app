@@ -5,14 +5,12 @@ import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 
 class GoogleCalendarClient {
-  // Scope estricto con el principio de mínimos privilegios (solo eventos)
   static const List<String> _scopes = [
     calendar.CalendarApi.calendarEventsScope,
   ];
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: _scopes);
 
-  /// Inicia sesión con Google respetando el scope de mínimos privilegios
   Future<GoogleSignInAccount?> signIn() async {
     try {
       final account = await _googleSignIn.signIn();
@@ -22,12 +20,6 @@ class GoogleCalendarClient {
     }
   }
 
-  /// Cierra la sesión activa
-  Future<void> signOut() async {
-    await _googleSignIn.signOut();
-  }
-
-  /// Obtiene un cliente autenticado de la API de Google Calendar
   Future<calendar.CalendarApi> _getCalendarApi() async {
     var account = _googleSignIn.currentUser;
     account ??= await _googleSignIn.signInSilently();
@@ -37,17 +29,29 @@ class GoogleCalendarClient {
       throw Exception('Usuario no autenticado en Google.');
     }
 
-    // Extensión que convierte las credenciales de GoogleSignIn a un cliente HTTP autenticado para googleapis
     final httpClient = await _googleSignIn.authenticatedClient();
     if (httpClient == null) {
-      throw Exception(
-          'No se pudieron obtener los encabezados de autenticación OAuth2.');
+      throw Exception('No se pudieron obtener credenciales OAuth2.');
     }
 
     return calendar.CalendarApi(httpClient);
   }
 
-  /// Crea un bloque de tiempo de enfoque en el calendario principal ('primary')
+  /// Obtiene la lista de eventos en un rango de tiempo específico (getEventsInRange)
+  Future<List<calendar.Event>> getEventsInRange(
+      DateTime start, DateTime end) async {
+    final api = await _getCalendarApi();
+    final events = await api.events.list(
+      'primary',
+      timeMin: start.toUtc(),
+      timeMax: end.toUtc(),
+      singleEvents: true,
+      orderBy: 'startTime',
+    );
+    return events.items ?? [];
+  }
+
+  /// Crea el bloque de tiempo de enfoque en el calendario
   Future<String> createFocusTimeBlock({
     required String title,
     required DateTime startTime,
@@ -67,9 +71,7 @@ class GoogleCalendarClient {
         dateTime: endTime.toUtc(),
         timeZone: 'UTC',
       )
-      ..colorId =
-          '10' // Color verde para indicar bloque de enfoque / productividad
-      ..transparency = 'opaque'; // Marca la disponibilidad como 'Ocupado'
+      ..colorId = '10';
 
     final createdEvent = await api.events.insert(event, 'primary');
     return createdEvent.id ?? '';
