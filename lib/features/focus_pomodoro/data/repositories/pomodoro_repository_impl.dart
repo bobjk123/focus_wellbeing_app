@@ -31,7 +31,7 @@ class PomodoroRepositoryImpl implements PomodoroRepository {
       ..growthDurationMinutes = session.durationMinutes
       ..associatedPomodoroSessionId = session.uuid;
 
-    // 2. Guardar sesión y árbol localmente en Isar DB
+    // 2. Guardar sesión y árbol localmente en una transacción cifrada.
     await localDataSource.saveSessionAndPlantTree(
       session: session,
       tree: tree,

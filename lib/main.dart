@@ -2,34 +2,29 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:focus_wellbeing_app/features/shared/data/models/app_entities.dart';
-import 'package:isar/isar.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'injection_container.dart' as di;
+import 'core/database/sqlite_database.dart';
 import 'features/focus_pomodoro/presentation/bloc/pomodoro_bloc.dart';
+import 'core/notifications/notification_service.dart';
+import 'core/background/workmanager_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 1. Obtener el directorio persistente seguro de la app
-  final dir = await getApplicationDocumentsDirectory();
+  await WorkmanagerService.initialize();
+  await WorkmanagerService.registerPeriodicScreenTimeCheck();
 
-  // 2. Abrir la base de datos Isar DB
-  final isar = await Isar.open(
-    [
-      UserTaskSchema,
-      PomodoroSessionSchema,
-      PlantTreeSchema,
-      CalendarEventSchema,
-      UsageLimitSchema,
-    ],
-    directory: dir.path,
-    name: 'wellbeing_db',
-  );
+  // 1. Inicializar servicio de notificaciones
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+  await notificationService.requestPermissions();
+
+  // 2. Abrir la base de datos SQLite protegida con SQLCipher/AES-256
+  final database = await SqliteDatabase.open();
 
   // 3. Inicializar Inyección de Dependencias (Service Locator)
-  await di.initServiceLocator(isar);
+  await di.initServiceLocator(database, notificationService);
 
   runApp(const MyApp());
 }

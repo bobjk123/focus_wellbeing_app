@@ -1,7 +1,7 @@
 // lib/features/digital_wellbeing/data/datasources/usage_stats_local_datasource.dart
 
+import 'package:focus_wellbeing_app/core/database/sqlite_database.dart';
 import 'package:focus_wellbeing_app/features/shared/data/models/app_entities.dart';
-import 'package:isar/isar.dart';
 
 abstract class UsageStatsLocalDataSource {
   Future<List<UsageLimit>> getUsageLimits();
@@ -9,18 +9,18 @@ abstract class UsageStatsLocalDataSource {
     required String packageName,
     required String appName,
     required int limitMinutes,
+    bool? isBlocked,
   });
 }
 
 class UsageStatsLocalDataSourceImpl implements UsageStatsLocalDataSource {
-  final Isar isar;
+  final SqliteDatabase database;
 
-  UsageStatsLocalDataSourceImpl(this.isar);
+  UsageStatsLocalDataSourceImpl(this.database);
 
   @override
   Future<List<UsageLimit>> getUsageLimits() async {
-    // Consulta todos los registros de límites guardados en la base de datos cifrada
-    return await isar.usageLimits.where().findAll();
+    return database.getUsageLimits();
   }
 
   @override
@@ -28,28 +28,23 @@ class UsageStatsLocalDataSourceImpl implements UsageStatsLocalDataSource {
     required String packageName,
     required String appName,
     required int limitMinutes,
+    bool? isBlocked,
   }) async {
-    await isar.writeTxn(() async {
-      // Buscar si ya existe una configuración para esta aplicación por su packageName
-      final existingRecord = await isar.usageLimits
-          .filter()
-          .packageNameEqualTo(packageName)
-          .findFirst();
+    final existingRecord = await database.findUsageLimit(packageName);
+    final record = existingRecord ?? UsageLimit()
+      ..packageName = packageName
+      ..appName = appName
+      ..dailyLimitMinutes = limitMinutes
+      ..currentUsageMinutes = 0
+      ..isBlocked = false
+      ..lastUpdated = DateTime.now();
 
-      if (existingRecord != null) {
-        existingRecord.dailyLimitMinutes = limitMinutes;
-        existingRecord.lastUpdated = DateTime.now();
-        await isar.usageLimits.put(existingRecord);
-      } else {
-        final newRecord = UsageLimit()
-          ..packageName = packageName
-          ..appName = appName
-          ..dailyLimitMinutes = limitMinutes
-          ..currentUsageMinutes = 0
-          ..isBlocked = false
-          ..lastUpdated = DateTime.now();
-        await isar.usageLimits.put(newRecord);
-      }
-    });
+    record.appName = appName;
+    record.dailyLimitMinutes = limitMinutes;
+    if (isBlocked != null) {
+      record.isBlocked = isBlocked;
+    }
+    record.lastUpdated = DateTime.now();
+    await database.saveUsageLimit(record);
   }
 }

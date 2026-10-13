@@ -1,11 +1,12 @@
 // lib/injection_container.dart
 
 import 'package:focus_wellbeing_app/core/network/google_calendar_client.dart';
+import 'package:focus_wellbeing_app/core/notifications/notification_service.dart';
 import 'package:focus_wellbeing_app/features/calendar_sync/data/repositories/calendar_sync_repository.dart';
 import 'package:focus_wellbeing_app/features/focus_pomodoro/domain/usescases/complete_pomodoro_session_usecase.dart';
 import 'package:get_it/get_it.dart';
-import 'package:isar/isar.dart';
 
+import 'core/database/sqlite_database.dart';
 import 'features/focus_pomodoro/data/datasources/calendar_remote_datasource.dart';
 import 'features/focus_pomodoro/data/datasources/pomodoro_local_datasource.dart';
 import 'features/focus_pomodoro/data/repositories/pomodoro_repository_impl.dart';
@@ -24,11 +25,15 @@ import 'features/calendar_sync/presentation/bloc/calendar_sync_bloc.dart';
 
 final sl = GetIt.instance; // sl = Service Locator
 
-Future<void> initServiceLocator(Isar isarInstance) async {
+Future<void> initServiceLocator(
+  SqliteDatabase database,
+  NotificationService notificationService,
+) async {
+  sl.registerLazySingleton<NotificationService>(() => notificationService);
+
   // Motor On-Device AI / SLM
   sl.registerLazySingleton<SlmEngine>(() => SlmEngine());
-  // 1. Instancia compartida de Isar DB
-  sl.registerLazySingleton<Isar>(() => isarInstance);
+  sl.registerLazySingleton<SqliteDatabase>(() => database);
 
   // Client HTTP de Google Calendar
   sl.registerLazySingleton<GoogleCalendarClient>(() => GoogleCalendarClient());
@@ -66,7 +71,7 @@ Future<void> initServiceLocator(Isar isarInstance) async {
 
   // 2. Repositorio de Bienestar Digital
   sl.registerLazySingleton<UsageRepository>(
-    () => UsageRepositoryImpl(localDataSource: sl()),
+    () => UsageRepositoryImpl(localDataSource: sl(), notificationService: sl()),
   );
 
   // 3. Casos de Uso

@@ -3,10 +3,9 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:isar/isar.dart';
 
 class EncryptionService {
-  static const String _encryptionKeyName = 'isar_aes_256_encryption_key';
+  static const String _encryptionKeyName = 'sqlite_sqlcipher_aes_256_key';
 
   final FlutterSecureStorage _secureStorage;
 

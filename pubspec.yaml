@@ -1,5 +1,5 @@
 name: focus_wellbeing_app
-description: Aplicación de productividad, bienestar digital e IA ética.
+description: App de productividad, bienestar digital, time-blocking e IA ética.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -14,27 +14,39 @@ dependencies:
   flutter_bloc: ^8.1.3
   get_it: ^7.6.7
 
-  # Base de Datos Local y Cifrado
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
+  # Persistencia Local y Cifrado
   flutter_secure_storage: ^9.0.0
-  crypto: ^3.0.3
+  sqlite3: ^3.7.1
+  path: ^1.9.1
 
   # Sincronización y Red
   googleapis: ^13.1.0
   google_sign_in: ^6.2.1
+  extension_google_sign_in_as_googleapis_auth: ^2.0.1
   http: ^1.2.0
+
+  # Notificaciones y Segundo Plano
+  flutter_local_notifications: ^17.1.2
+  workmanager: ^0.5.2
 
   # Iconos
   cupertino_icons: ^1.0.6
   path_provider: ^2.1.6
-  flutter_test:
-    sdk: flutter
-  extension_google_sign_in_as_googleapis_auth: ^2.0.13
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   flutter_lints: ^3.0.0
 
-  # Generadores de Código
-  isar_generator: ^3.1.0+1
-  build_runner: ^2.4.8
+  # Testing
+  bloc_test: ^9.1.5
+  mocktail: ^1.0.3
+
+# SOLUCIÓN: Sobrescribir las restricciones transitivas en conflicto
+dependency_overrides:
+  analyzer: ^6.0.0
+
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlcipher

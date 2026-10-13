@@ -29,8 +29,8 @@ incluye:
   de sesiones completadas.
 - Gestión de estado con `flutter_bloc`.
 - Inyección de dependencias con `get_it`.
-- Modelos Isar para tareas, sesiones Pomodoro, árboles, eventos de calendario y
-  límites de uso.
+- Persistencia SQLite cifrada con SQLCipher para tareas, sesiones Pomodoro,
+  árboles, eventos de calendario y límites de uso.
 - Servicio inicial de almacenamiento seguro para claves de cifrado.
 - Cliente inicial de Google Calendar para crear bloques de enfoque mediante
   autenticación OAuth.
@@ -47,7 +47,7 @@ La interfaz visible todavía es mínima y algunas capas representan la base
 arquitectónica de funcionalidades que aún no están terminadas. Las APIs,
 modelos y decisiones técnicas pueden cambiar mientras el proyecto evoluciona.
 
-### Cambios recientes — 8 de octubre de 2026
+### Cambios recientes — 13 de octubre de 2026
 
 Durante la sesión de hoy se incorporaron las siguientes piezas:
 
@@ -58,8 +58,16 @@ Durante la sesión de hoy se incorporaron las siguientes piezas:
   cinco minutos.
 - Se añadieron entidades y estados BLoC para representar propuestas de
   planificación, confirmaciones y errores de sincronización.
-- Se añadió la persistencia de límites de uso en Isar y el cálculo de cuándo
-  una aplicación supera su límite diario.
+- Se añadió la persistencia cifrada de límites de uso en SQLite/SQLCipher y el
+  cálculo de cuándo una aplicación supera su límite diario.
+- Se migró la persistencia local completa desde Isar a SQLite con SQLCipher.
+- Se centralizó la apertura de la base, el esquema y las transacciones en
+  `lib/core/database/sqlite_database.dart`.
+- Se configuró `sqlite3` con el build hook `source: sqlcipher` para empaquetar
+  SQLCipher en Android, iOS, Windows, macOS y Linux.
+- Se conservó la clave AES-256 en `flutter_secure_storage` y se actualizó el
+  worker de segundo plano para abrir la misma base cifrada que la aplicación
+  principal.
 - Se añadió un motor de recomendaciones explicables basado en reglas locales:
   fatiga de sesiones recientes, acumulación diaria de enfoque y eventos próximos.
 - Se añadió una tarjeta reutilizable para mostrar la explicación de cada
@@ -82,8 +90,8 @@ en la navegación principal.
 - Conectar las recomendaciones de IA con el flujo de sesiones y documentar sus
   límites, explicaciones y controles de la persona usuaria.
 - Ampliar las pruebas unitarias, de widgets e integración.
-- Finalizar la integración del cifrado de la base de datos y documentar el
-  modelo de privacidad.
+- Completar la migración de datos históricos desde el prototipo Isar y
+  documentar el modelo de privacidad.
 
 El orden puede cambiar. Consulta los issues y pull requests para conocer el
 trabajo activo y las decisiones recientes.
@@ -95,8 +103,8 @@ trabajo activo y las decisiones recientes.
 | Cliente | Flutter / Dart |
 | Estado | `flutter_bloc` |
 | Inyección | `get_it` |
-| Persistencia | Isar |
-| Seguridad local | `flutter_secure_storage`, `crypto` |
+| Persistencia | SQLite con SQLCipher (Android, iOS, Windows, macOS y Linux) |
+| Seguridad local | `flutter_secure_storage`, AES-256 |
 | Integraciones | Google APIs, Google Sign-In, HTTP |
 
 ## Requisitos
@@ -118,7 +126,6 @@ flutter doctor
 git clone https://github.com/bobjk123/focus_wellbeing_app.git
 cd focus_wellbeing_app
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs
 flutter run
 ```
 
@@ -140,9 +147,24 @@ flutter analyze
 flutter test
 ```
 
-El archivo `lib/features/shared/data/models/app_entities.g.dart` es generado.
-Cuando cambies los modelos de Isar, vuelve a ejecutar `build_runner` y revisa
-el resultado antes de abrir un pull request.
+La base de datos se abre desde `lib/core/database/sqlite_database.dart`. La
+clave de 32 bytes se genera una sola vez y se conserva en
+`flutter_secure_storage`; SQLCipher la usa para cifrar todo el archivo SQLite.
+El paquete `sqlite3` se configura mediante el build hook `source: sqlcipher`
+para incluir el binario SQLCipher en Android, iOS, Windows, macOS y Linux.
+La aplicación usa el archivo `wellbeing.db` dentro del directorio de documentos
+de la aplicación. La apertura activa `PRAGMA key`, compatibilidad de SQLCipher
+4 y claves foráneas antes de crear o consultar las tablas.
+
+El esquema actual contiene las tablas `user_tasks`, `pomodoro_sessions`,
+`plant_trees`, `calendar_events` y `usage_limits`. Las sesiones Pomodoro y su
+árbol se guardan dentro de una única transacción para evitar estados parciales.
+Las futuras modificaciones del esquema deben incorporar una migración
+versionada antes de cambiar las tablas existentes.
+
+La clave nunca se escribe en el repositorio ni en texto plano dentro de la
+base. Si se elimina el almacenamiento seguro del dispositivo, la base cifrada
+no puede recuperarse sin una copia de la clave.
 
 ## Estructura del proyecto
 
@@ -198,10 +220,18 @@ almacenamiento local. No incluyas credenciales, tokens, archivos `.env` ni datos
 personales en commits o issues. La política de reporte responsable está en
 [SECURITY.md](SECURITY.md).
 
-La presencia de un servicio de claves seguras no significa que todas las rutas
-de persistencia estén cifradas todavía; esa integración forma parte del
-desarrollo pendiente. Del mismo modo, Google Calendar solo se utiliza cuando
-la persona usuaria inicia sesión y concede el permiso solicitado.
+La persistencia local de la aplicación utiliza SQLCipher en Android, iOS,
+Windows, macOS y Linux. La clave AES-256 se genera con un generador
+criptográficamente seguro y se guarda mediante `flutter_secure_storage`, que
+delegará su protección al almacén seguro disponible en cada plataforma.
+Eliminar la aplicación o restablecer el almacenamiento seguro puede hacer
+irrecuperables los datos locales cifrados.
+
+La configuración `source: sqlcipher` del build hook descarga o incorpora los
+binarios nativos necesarios durante el build. Revisa las licencias de
+SQLCipher y OpenSSL antes de distribuir una versión comercial. Google Calendar
+solo se utiliza cuando la persona usuaria inicia sesión y concede el permiso
+solicitado.
 
 ## Licencia
 
