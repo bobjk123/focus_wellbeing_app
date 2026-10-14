@@ -3,7 +3,6 @@
 import 'package:focus_wellbeing_app/features/calendar_sync/data/repositories/calendar_sync_repository.dart';
 
 import '../../domain/entities/focus_schedule_proposal.dart';
-import '../../domain/entities/time_slot.dart';
 import '../datasources/calendar_sync_remote_datasource.dart';
 
 class CalendarSyncRepositoryImpl implements CalendarSyncRepository {

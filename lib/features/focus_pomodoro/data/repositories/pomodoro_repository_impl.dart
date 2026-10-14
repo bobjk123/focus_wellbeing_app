@@ -39,7 +39,7 @@ class PomodoroRepositoryImpl implements PomodoroRepository {
 
     // 3. Sincronizar evento en Google Calendar
     try {
-      final googleEventId = await remoteDataSource.createTimeBlockEvent(
+      await remoteDataSource.createTimeBlockEvent(
         title: 'Focus: $taskTitle',
         startTime: session.startTime,
         endTime: session.endTime ?? DateTime.now(),

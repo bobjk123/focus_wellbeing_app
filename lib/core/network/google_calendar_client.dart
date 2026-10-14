@@ -9,11 +9,25 @@ class GoogleCalendarClient {
     calendar.CalendarApi.calendarEventsScope,
   ];
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: _scopes);
+  static bool _initialized = false;
+  final GoogleSignIn _googleSignIn;
+  GoogleSignInAccount? _currentUser;
+
+  GoogleCalendarClient({GoogleSignIn? googleSignIn})
+      : _googleSignIn = googleSignIn ?? GoogleSignIn.instance;
+
+  Future<void> _ensureInitialized() async {
+    if (!_initialized) {
+      await _googleSignIn.initialize();
+      _initialized = true;
+    }
+  }
 
   Future<GoogleSignInAccount?> signIn() async {
     try {
-      final account = await _googleSignIn.signIn();
+      await _ensureInitialized();
+      final account = await _googleSignIn.authenticate(scopeHint: _scopes);
+      _currentUser = account;
       return account;
     } catch (e) {
       throw Exception('Error al autenticar con Google: $e');
@@ -21,18 +35,23 @@ class GoogleCalendarClient {
   }
 
   Future<calendar.CalendarApi> _getCalendarApi() async {
-    var account = _googleSignIn.currentUser;
-    account ??= await _googleSignIn.signInSilently();
+    await _ensureInitialized();
+    var account = _currentUser;
+    if (account == null) {
+      final attempt = _googleSignIn.attemptLightweightAuthentication();
+      if (attempt != null) {
+        account = await attempt;
+        _currentUser = account;
+      }
+    }
     account ??= await signIn();
 
     if (account == null) {
       throw Exception('Usuario no autenticado en Google.');
     }
 
-    final httpClient = await _googleSignIn.authenticatedClient();
-    if (httpClient == null) {
-      throw Exception('No se pudieron obtener credenciales OAuth2.');
-    }
+    final authz = await account.authorizationClient.authorizeScopes(_scopes);
+    final httpClient = authz.authClient(scopes: _scopes);
 
     return calendar.CalendarApi(httpClient);
   }

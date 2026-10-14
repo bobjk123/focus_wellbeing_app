@@ -1,6 +1,5 @@
 // lib/features/calendar_sync/data/datasources/calendar_sync_remote_datasource.dart
 
-import 'package:googleapis/calendar/v3.dart' as calendar;
 import '../../../../core/network/google_calendar_client.dart';
 import '../../domain/entities/time_slot.dart';
 

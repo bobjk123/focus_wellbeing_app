@@ -21,13 +21,21 @@ class NotificationService {
     const LinuxInitializationSettings linuxSettings =
         LinuxInitializationSettings(defaultActionName: 'Open app');
 
+    const WindowsInitializationSettings windowsSettings =
+        WindowsInitializationSettings(
+      appName: 'Focus & Wellbeing App',
+      appUserModelId: 'com.wellbeing.focus_wellbeing_app',
+      guid: 'd28a3f78-2cfb-4a55-83c7-4dc567843e91',
+    );
+
     const InitializationSettings settings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
       linux: linuxSettings,
+      windows: windowsSettings,
     );
 
-    await _notificationsPlugin.initialize(settings);
+    await _notificationsPlugin.initialize(settings: settings);
   }
 
   /// Solicita permisos de notificación en Android 13+ e iOS
@@ -70,6 +78,7 @@ class NotificationService {
         presentAlert: true,
         presentSound: true,
       ),
+      windows: WindowsNotificationDetails(),
     );
 
     final hours = limitMinutes ~/ 60;
@@ -77,10 +86,11 @@ class NotificationService {
     final timeStr = hours > 0 ? '${hours}h ${mins}m' : '${mins}m';
 
     await _notificationsPlugin.show(
-      notificationId,
-      'Límite de tiempo alcanzado: $appName',
-      'Has alcanzado el límite diario de $timeStr configurado para $appName. Es momento de un descanso.',
-      notificationDetails,
+      id: notificationId,
+      title: 'Límite de tiempo alcanzado: $appName',
+      body:
+          'Has alcanzado el límite diario de $timeStr configurado para $appName. Es momento de un descanso.',
+      notificationDetails: notificationDetails,
     );
   }
 }

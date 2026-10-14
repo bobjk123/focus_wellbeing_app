@@ -47,7 +47,30 @@ La interfaz visible todavía es mínima y algunas capas representan la base
 arquitectónica de funcionalidades que aún no están terminadas. Las APIs,
 modelos y decisiones técnicas pueden cambiar mientras el proyecto evoluciona.
 
-### Cambios recientes — 13 de octubre de 2026
+### Cambios recientes — 14 de octubre de 2026
+
+Durante la sesión de hoy se realizaron las siguientes actualizaciones críticas y mejoras de compatibilidad:
+
+- **Actualización global de dependencias a versiones mayores**: Se migraron todas las dependencias principales a sus versiones actuales (`flutter_bloc: ^9.1.1`, `get_it: ^9.3.0`, `flutter_secure_storage: ^11.2.0`, `googleapis: ^17.0.0`, `google_sign_in: ^7.2.0`, `extension_google_sign_in_as_googleapis_auth: ^3.0.0`, `flutter_local_notifications: ^22.3.2`, `workmanager: ^0.10.10`, `cupertino_icons: ^2.0.0`, `flutter_lints: ^6.0.0`, `bloc_test: ^10.0.0`).
+- **Eliminación del override forzado**: Se removió la directiva `dependency_overrides: analyzer: ^6.0.0` de `pubspec.yaml`, resolviendo las dependencias de forma estándar y sin bloqueos de versión.
+- **Tolerancia y compatibilidad multiplataforma en `WorkmanagerService`**:
+  - Se implementó la verificación `WorkmanagerService.isSupported` para plataformas que admiten nativamente Workmanager (`Android`, `iOS`, `macOS`, `Linux`).
+  - En plataformas de escritorio como Windows, se omite de forma segura la inicialización y el registro de tareas en segundo plano, previniendo excepciones no controladas de tipo `UnimplementedError`.
+  - Se actualizaron las firmas para la versión 0.10.x (`NetworkType.notRequired`, `ExistingPeriodicWorkPolicy.keep` y eliminación del parámetro en desuso `isInDebugMode`).
+- **Soporte nativo para Windows en `NotificationService`**:
+  - Se incorporó `WindowsInitializationSettings` y `WindowsNotificationDetails` en `flutter_local_notifications: ^22.3.2`, permitiendo la emisión de alertas tanto en Windows Desktop como en Android, iOS y Linux.
+  - Se migraron las invocaciones a parámetros con nombre requeridos por la nueva versión (`initialize(settings: ...)` y `show(id: ..., title: ..., ...)`).
+- **Modernización del cliente de calendario (`GoogleCalendarClient`)**:
+  - Adaptación al nuevo flujo singleton y autenticación interactiva (`GoogleSignIn.instance.authenticate`) y no interactiva (`attemptLightweightAuthentication`).
+  - Obtención de credenciales HTTP autenticadas para `CalendarApi` mediante `account.authorizationClient.authorizeScopes()`.
+- **Actualización de opciones de cifrado (`EncryptionService`)**:
+  - Migración a `AndroidOptions(resetOnError: true)` alineado con el estándar moderno de KeyStore y AES-GCM en `flutter_secure_storage: ^11.2.0`.
+- **Limpieza de código y organización de pruebas**:
+  - Reubicación de la suite `encryption_service_test.dart` a su directorio correspondiente en `test/core/security/`.
+  - Depuración completa del analizador estático: cero errores y cero advertencias (`flutter analyze` 100% limpio).
+  - Verificación exitosa de la totalidad de pruebas unitarias y de widgets (`flutter test`).
+
+### Cambios anteriores — 13 de octubre de 2026
 
 Durante la sesión de hoy se incorporaron las siguientes piezas:
 
@@ -101,11 +124,13 @@ trabajo activo y las decisiones recientes.
 | Área | Tecnología |
 | --- | --- |
 | Cliente | Flutter / Dart |
-| Estado | `flutter_bloc` |
-| Inyección | `get_it` |
+| Estado | `flutter_bloc` (v9.x) |
+| Inyección | `get_it` (v9.x) |
 | Persistencia | SQLite con SQLCipher (Android, iOS, Windows, macOS y Linux) |
-| Seguridad local | `flutter_secure_storage`, AES-256 |
-| Integraciones | Google APIs, Google Sign-In, HTTP |
+| Seguridad local | `flutter_secure_storage` (v11.x), AES-256 |
+| Integraciones | Google APIs (v17.x), Google Sign-In (v7.x), HTTP |
+| Segundo plano | `workmanager` (v0.10.x, soporte nativo en Android, iOS, macOS, Linux) |
+| Notificaciones | `flutter_local_notifications` (v22.x, soporte en Android, iOS, Linux, Windows) |
 
 ## Requisitos
 
@@ -172,17 +197,19 @@ no puede recuperarse sin una copia de la clave.
 lib/
 ├── core/
 │   ├── ai/                       # Motor local experimental y recomendaciones
-│   └── network/                  # Clientes de red, incluido Google Calendar
+│   ├── background/               # Tareas periódicas en segundo plano (Workmanager)
+│   ├── database/                 # Base de datos SQLite cifrada con SQLCipher
+│   ├── network/                  # Clientes de red (Google Calendar OAuth2)
+│   ├── notifications/            # Servicio de notificaciones multiplataforma
+│   └── security/                 # Gestión de claves de cifrado en KeyStore / Keychain
 ├── features/
-│   ├── focus_pomodoro/
-│   │   ├── data/                 # Fuentes de datos y repositorios
-│   │   ├── domain/               # Contratos y casos de uso
-│   │   └── presentation/         # BLoC, pantallas y widgets
-│   ├── calendar_sync/             # Propuestas y confirmación de bloques
-│   ├── digital_wellbeing/         # Límites y uso diario de aplicaciones
-│   └── shared/                   # Modelos compartidos
-├── injection_container.dart      # Registro de dependencias
-└── main.dart                     # Punto de entrada
+│   ├── calendar_sync/            # Propuestas y confirmación de bloques en agenda
+│   ├── digital_wellbeing/        # Límites de tiempo y uso diario de aplicaciones
+│   ├── focus_pomodoro/           # Sesiones Pomodoro, bosque virtual y temporizador
+│   ├── reports/                  # Reportes semanales de enfoque y fatiga
+│   └── shared/                   # Modelos, entidades y dashboard común
+├── injection_container.dart      # Registro de dependencias (Service Locator)
+└── main.dart                     # Punto de entrada de la aplicación
 ```
 
 La aplicación sigue una separación inspirada en Clean Architecture:

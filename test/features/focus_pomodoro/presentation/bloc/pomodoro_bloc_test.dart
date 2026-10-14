@@ -8,7 +8,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:focus_wellbeing_app/features/focus_pomodoro/presentation/bloc/pomodoro_bloc.dart';
 import 'package:focus_wellbeing_app/features/focus_pomodoro/presentation/bloc/pomodoro_event.dart';
 import 'package:focus_wellbeing_app/features/focus_pomodoro/presentation/bloc/pomodoro_state.dart';
-import 'package:focus_wellbeing_app/features/shared/data/models/app_entities.dart';
 
 class MockCompletePomodoroSessionUseCase extends Mock
     implements CompletePomodoroSessionUseCase {}
