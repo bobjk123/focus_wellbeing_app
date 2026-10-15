@@ -2,6 +2,16 @@
 
 abstract class PomodoroState {}
 
+class DailyForestStatsLoadedState extends PomodoroState {
+  final int treesPlanted;
+  final int focusMinutes;
+
+  DailyForestStatsLoadedState({
+    required this.treesPlanted,
+    required this.focusMinutes,
+  });
+}
+
 class PomodoroInitialState extends PomodoroState {}
 
 class PomodoroRunningState extends PomodoroState {}

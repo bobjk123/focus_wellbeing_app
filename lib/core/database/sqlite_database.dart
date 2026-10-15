@@ -111,6 +111,26 @@ class SqliteDatabase {
     }
   }
 
+  Future<DailyForestStats> getDailyForestStats() async {
+    final startOfDay = DateTime.now();
+    final dayStart =
+        DateTime(startOfDay.year, startOfDay.month, startOfDay.day);
+    final rows = _database.select(
+      '''
+      SELECT COUNT(*) AS tree_count,
+             COALESCE(SUM(growth_duration_minutes), 0) AS focus_minutes
+      FROM plant_trees
+      WHERE status = ? AND planted_at >= ?
+      ''',
+      [TreeStatus.completed.index, dayStart.millisecondsSinceEpoch],
+    );
+    final row = rows.single;
+    return DailyForestStats(
+      treesPlanted: row['tree_count'] as int,
+      focusMinutes: row['focus_minutes'] as int,
+    );
+  }
+
   Future<void> close() async => _database.close();
 
   void _createSchema() {

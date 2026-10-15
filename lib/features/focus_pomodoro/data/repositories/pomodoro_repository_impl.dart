@@ -6,7 +6,6 @@ import '../../domain/repositories/pomodoro_repository.dart';
 import '../datasources/pomodoro_local_datasource.dart';
 import '../datasources/calendar_remote_datasource.dart';
 
-
 class PomodoroRepositoryImpl implements PomodoroRepository {
   final PomodoroLocalDataSource localDataSource;
   final CalendarRemoteDataSource remoteDataSource;
@@ -15,6 +14,10 @@ class PomodoroRepositoryImpl implements PomodoroRepository {
     required this.localDataSource,
     required this.remoteDataSource,
   });
+
+  @override
+  Future<DailyForestStats> getDailyForestStats() =>
+      localDataSource.getDailyForestStats();
 
   @override
   Future<void> saveCompletedSession({

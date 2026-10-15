@@ -6,6 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'injection_container.dart' as di;
 import 'core/database/sqlite_database.dart';
 import 'features/focus_pomodoro/presentation/bloc/pomodoro_bloc.dart';
+import 'features/digital_wellbeing/presentation/bloc/digital_wellbeing_bloc.dart';
+import 'features/calendar_sync/presentation/bloc/calendar_sync_bloc.dart';
+import 'features/shared/presentation/pages/dashboard_page.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/background/workmanager_service.dart';
 
@@ -30,7 +33,9 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Widget? home;
+
+  const MyApp({super.key, this.home});
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +46,15 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: BlocProvider(
-        create: (_) => di.sl<PomodoroBloc>(),
-        child: const Scaffold(
-          body: Center(
-            child: Text('Base de datos cifrada localmente con AES-256.'),
+      home: home ??
+          MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (_) => di.sl<DigitalWellbeingBloc>()),
+              BlocProvider(create: (_) => di.sl<CalendarSyncBloc>()),
+              BlocProvider(create: (_) => di.sl<PomodoroBloc>()),
+            ],
+            child: const DashboardPage(),
           ),
-        ),
-      ),
     );
   }
 }

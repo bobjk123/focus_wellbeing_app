@@ -37,7 +37,8 @@ class _ForestViewPageState extends State<ForestViewPage> {
       ..uuid = 'tree_4'
       ..species = 'Roble Nobilis'
       ..status = TreeStatus.completed
-      ..plantedAt = DateTime.now(),
+      ..plantedAt = DateTime.now()
+      ..growthDurationMinutes = 25,
   ];
 
   int get _completedTreesCount =>

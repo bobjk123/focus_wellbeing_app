@@ -61,7 +61,10 @@ Future<void> initServiceLocator(
 
   // 5. BLoCs (Factory para crear instancias nuevas cuando la UI lo requiera)
   sl.registerFactory<PomodoroBloc>(
-    () => PomodoroBloc(completePomodoroSessionUseCase: sl()),
+    () => PomodoroBloc(
+      completePomodoroSessionUseCase: sl(),
+      repository: sl(),
+    ),
   );
 
   // 1. Data Source de Bienestar Digital

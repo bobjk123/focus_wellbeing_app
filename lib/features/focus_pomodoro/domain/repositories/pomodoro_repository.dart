@@ -3,6 +3,8 @@
 import '../../../shared/data/models/app_entities.dart';
 
 abstract class PomodoroRepository {
+  Future<DailyForestStats> getDailyForestStats();
+
   Future<void> saveCompletedSession({
     required PomodoroSession session,
     required String treeSpecies,

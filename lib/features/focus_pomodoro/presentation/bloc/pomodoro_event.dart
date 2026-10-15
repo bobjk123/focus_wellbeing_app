@@ -2,6 +2,8 @@
 
 abstract class PomodoroEvent {}
 
+class LoadDailyForestStatsEvent extends PomodoroEvent {}
+
 class FinishPomodoroSessionEvent extends PomodoroEvent {
   final String taskId;
   final String taskTitle;

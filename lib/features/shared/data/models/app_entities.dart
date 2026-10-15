@@ -41,6 +41,16 @@ class PlantTree {
   String? associatedPomodoroSessionId;
 }
 
+class DailyForestStats {
+  final int treesPlanted;
+  final int focusMinutes;
+
+  const DailyForestStats({
+    required this.treesPlanted,
+    required this.focusMinutes,
+  });
+}
+
 class CalendarEvent {
   int id = 0;
   late String googleEventId;

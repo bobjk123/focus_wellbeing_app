@@ -119,6 +119,38 @@ en la navegación principal.
 El orden puede cambiar. Consulta los issues y pull requests para conocer el
 trabajo activo y las decisiones recientes.
 
+## 2. Hoja de ruta: Lo que se hará después
+
+Una vez vinculada la página principal con los módulos de Bosque Virtual,
+Google Calendar, Bienestar Digital y Reportes, los siguientes pasos son:
+
+### Pruebas de Integración y Flujo Completo (E2E)
+
+- Verificar la persistencia real guardando datos en la base cifrada y
+  confirmando que persistan al cerrar y abrir la aplicación.
+- Probar el flujo de notificación cuando se excede un límite de pantalla
+  configurado.
+
+### Optimizaciones de Rendimiento y UX
+
+- Agregar estados de carga (Skeletons / Spinners) mientras se leen las
+  consultas de la base local al iniciar la app.
+- Adaptar el layout para pantallas de escritorio (Windows/macOS) y
+  dispositivos móviles (Android/iOS).
+
+### Manejo de Errores y Casos Límite
+
+- Configurar estados vacíos cuando no haya eventos agendados en Google
+  Calendar o cuando el bosque no tenga árboles.
+- Capturar excepciones cuando falle la autenticación OAuth2 con Google.
+
+### Preparación para Producción
+
+- Ejecutar el script de compilación Release (`.\build_windows.ps1`).
+- Verificar los binarios nativos requeridos, incluido `isar.dll` si se reactiva
+  la persistencia Isar en una futura migración. La implementación actual usa
+  SQLCipher y debe verificar sus binarios nativos correspondientes.
+
 ## Tecnologías
 
 | Área | Tecnología |

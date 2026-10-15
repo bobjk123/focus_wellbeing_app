@@ -1,15 +1,35 @@
 // lib/features/focus_pomodoro/presentation/bloc/pomodoro_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:focus_wellbeing_app/features/focus_pomodoro/domain/usescases/complete_pomodoro_session_usecase.dart';
+import 'package:focus_wellbeing_app/features/focus_pomodoro/domain/repositories/pomodoro_repository.dart';
 import 'pomodoro_event.dart';
 import 'pomodoro_state.dart';
 
 class PomodoroBloc extends Bloc<PomodoroEvent, PomodoroState> {
   final CompletePomodoroSessionUseCase completePomodoroSessionUseCase;
+  final PomodoroRepository? repository;
 
-  PomodoroBloc({required this.completePomodoroSessionUseCase})
+  PomodoroBloc({required this.completePomodoroSessionUseCase, this.repository})
       : super(PomodoroInitialState()) {
+    on<LoadDailyForestStatsEvent>(_onLoadDailyForestStats);
     on<FinishPomodoroSessionEvent>(_onFinishSession);
+  }
+
+  Future<void> _onLoadDailyForestStats(
+    LoadDailyForestStatsEvent event,
+    Emitter<PomodoroState> emit,
+  ) async {
+    if (repository == null) return;
+    try {
+      final stats = await repository!.getDailyForestStats();
+      emit(DailyForestStatsLoadedState(
+        treesPlanted: stats.treesPlanted,
+        focusMinutes: stats.focusMinutes,
+      ));
+    } catch (e) {
+      emit(PomodoroErrorState(
+          'No se pudieron cargar las estadísticas del bosque: $e'));
+    }
   }
 
   Future<void> _onFinishSession(
@@ -47,6 +67,7 @@ class PomodoroBloc extends Bloc<PomodoroEvent, PomodoroState> {
           aiRestRecommendation: aiMessage,
         ),
       );
+      add(LoadDailyForestStatsEvent());
     } catch (e) {
       emit(PomodoroErrorState("Error al procesar el cierre de la sesión: $e"));
     }
