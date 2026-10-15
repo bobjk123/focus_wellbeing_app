@@ -50,7 +50,7 @@ modelos y decisiones técnicas pueden cambiar mientras el proyecto evoluciona.
 ### Cambios recientes — 15 de octubre de 2026
 
 Durante la sesión de hoy se conectó la página principal con los módulos
-existentes y se verificó su ejecución en Windows:
+existentes y se verificó su ejecución en Windows y Android:
 
 - **Dashboard conectado a BLoCs**: `DashboardPage` ahora recibe mediante
   `MultiBlocProvider` los estados de Pomodoro, Bienestar Digital y
@@ -67,10 +67,18 @@ existentes y se verificó su ejecución en Windows:
 - **Arranque multiplataforma**: se eliminó la pantalla placeholder de inicio y
   se corrigió la inicialización de un árbol del bosque que provocaba un
   `LateInitializationError` al abrir Windows.
+- **Compilación Android**: se habilitó Core Library Desugaring y se añadió
+  `desugar_jdk_libs` para satisfacer el requisito de
+  `flutter_local_notifications`. `flutter build apk --debug` genera
+  `build/app/outputs/flutter-apk/app-debug.apk` correctamente.
 - **Validación**: `flutter analyze` finaliza sin errores, las 8 pruebas
   automatizadas pasan y la aplicación compila, arranca y supera un hot restart
-  en Windows. El aviso de Workmanager en Windows es esperado porque esa
-  plataforma no implementa el servicio.
+  en Windows. La compilación iOS queda pendiente de validación en macOS con
+  Xcode y CocoaPods; este entorno Windows no expone el subcomando iOS y el
+  checkout no contiene `ios/Podfile`.
+- **Advertencias conocidas**: Workmanager se omite correctamente en Windows,
+  mientras que Gradle advierte sobre la futura migración de
+  `workmanager_android` al Kotlin integrado y sobre el acceso nativo de Java.
 
 ### Cambios recientes — 14 de octubre de 2026
 
