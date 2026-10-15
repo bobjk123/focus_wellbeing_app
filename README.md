@@ -47,6 +47,31 @@ La interfaz visible todavía es mínima y algunas capas representan la base
 arquitectónica de funcionalidades que aún no están terminadas. Las APIs,
 modelos y decisiones técnicas pueden cambiar mientras el proyecto evoluciona.
 
+### Cambios recientes — 15 de octubre de 2026
+
+Durante la sesión de hoy se conectó la página principal con los módulos
+existentes y se verificó su ejecución en Windows:
+
+- **Dashboard conectado a BLoCs**: `DashboardPage` ahora recibe mediante
+  `MultiBlocProvider` los estados de Pomodoro, Bienestar Digital y
+  sincronización con Google Calendar desde el contenedor de dependencias.
+- **Tarjetas dinámicas**: el dashboard muestra los árboles plantados y minutos
+  de enfoque del día desde SQLite/SQLCipher, el próximo bloque o la acción de
+  resolución de calendario, y el progreso del tiempo de pantalla consumido.
+- **Estadísticas del bosque**: se añadió una consulta diaria agregada en la
+  base local, expuesta por el repositorio y `PomodoroBloc`, con actualización
+  automática al completar una sesión.
+- **Navegación principal**: se habilitaron los destinos Inicio, Bosque,
+  Bienestar y Reportes mediante `NavigationBar` en móvil y `NavigationRail` en
+  escritorio.
+- **Arranque multiplataforma**: se eliminó la pantalla placeholder de inicio y
+  se corrigió la inicialización de un árbol del bosque que provocaba un
+  `LateInitializationError` al abrir Windows.
+- **Validación**: `flutter analyze` finaliza sin errores, las 8 pruebas
+  automatizadas pasan y la aplicación compila, arranca y supera un hot restart
+  en Windows. El aviso de Workmanager en Windows es esperado porque esa
+  plataforma no implementa el servicio.
+
 ### Cambios recientes — 14 de octubre de 2026
 
 Durante la sesión de hoy se realizaron las siguientes actualizaciones críticas y mejoras de compatibilidad:
@@ -99,15 +124,14 @@ Durante la sesión de hoy se incorporaron las siguientes piezas:
 Estas capacidades todavía no constituyen una integración final: las estadísticas
 de uso parten de datos de demostración cuando no existen registros, el motor de
 IA es determinista y local, y faltan la conexión con estadísticas reales del
-sistema, el flujo completo de permisos y la integración de todas las pantallas
-en la navegación principal.
+sistema y el flujo completo de permisos OAuth.
 
 ## En desarrollo
 
 - Completar la interfaz de usuario del temporizador.
 - Añadir tareas, hábitos y estadísticas.
-- Integrar la sincronización con calendarios en la navegación y completar el
-  consentimiento explícito, OAuth y manejo de errores por plataforma.
+- Completar el consentimiento explícito, OAuth y manejo de errores por
+  plataforma para la sincronización con calendarios.
 - Sustituir los datos de demostración del bienestar digital por estadísticas
   reales del sistema cuando la plataforma lo permita.
 - Conectar las recomendaciones de IA con el flujo de sesiones y documentar sus
