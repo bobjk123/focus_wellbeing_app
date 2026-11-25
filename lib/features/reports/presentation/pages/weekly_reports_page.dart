@@ -62,7 +62,10 @@ class _WeeklyReportsPageState extends State<WeeklyReportsPage> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
-        child: Column(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 960),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Resumen Semanal de Enfoque
@@ -245,6 +248,8 @@ class _WeeklyReportsPageState extends State<WeeklyReportsPage> {
             }),
           ],
         ),
+      ),
+    ),
       ),
     );
   }

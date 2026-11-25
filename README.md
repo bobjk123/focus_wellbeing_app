@@ -80,7 +80,15 @@ existentes y se verificó su ejecución en Windows y Android:
   mientras que Gradle advierte sobre la futura migración de
   `workmanager_android` al Kotlin integrado y sobre el acceso nativo de Java.
 
-### Cambios recientes — 14 de octubre de 2026
+### Cambios recientes — 25 de noviembre de 2026
+
+- **UI/UX**: Se añadieron skeletons animados (`SkeletonBox`, `DashboardCardSkeleton`), adaptación responsive para móvil/escritorio (`NavigationBar` / `NavigationRail` y grillas adaptables) y estados vacíos para Google Calendar, Bosque Virtual y Bienestar Digital.
+- **Manejo de errores OAuth2 / Google Calendar**: Se incorporó `CalendarAuthException` para clasificar cancelaciones, errores de red, configuración OAuth2 faltante, plataformas no soportadas y permisos insuficientes (`401`/`403`).
+- **Cobertura de pruebas**: Se agregaron pruebas de persistencia cifrada al cerrar y reabrir `SqliteDatabase`, pruebas de disparo y deduplicación de notificaciones por límites de pantalla, pruebas de widgets, `CalendarSyncBloc` y flujo E2E (21/21 pruebas exitosas).
+- **Build Release Windows y SQLCipher**: Se actualizó `build_windows.ps1` retirando `build_runner`/Isar y verificando la compilación Release con los binarios nativos de SQLCipher.
+- **Privacidad y migración**: Se documentó el modelo de privacidad local y la estrategia de migración histórica en [SECURITY.md](SECURITY.md).
+
+### Cambios anteriores — 14 de octubre de 2026
 
 Durante la sesión de hoy se realizaron las siguientes actualizaciones críticas y mejoras de compatibilidad:
 

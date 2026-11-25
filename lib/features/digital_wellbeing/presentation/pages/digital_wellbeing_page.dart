@@ -7,6 +7,7 @@ import '../bloc/digital_wellbeing_bloc.dart';
 import '../bloc/digital_wellbeing_event.dart';
 import '../bloc/digital_wellbeing_state.dart';
 import '../../domain/entities/app_usage_entity.dart';
+import '../../../shared/presentation/widgets/skeleton_box.dart';
 
 class DigitalWellbeingPage extends StatefulWidget {
   const DigitalWellbeingPage({super.key});
@@ -53,7 +54,7 @@ class _DigitalWellbeingPageState extends State<DigitalWellbeingPage> {
         },
         builder: (context, state) {
           if (state is WellbeingLoadingState) {
-            return const Center(child: CircularProgressIndicator());
+            return _buildLoadingSkeleton();
           }
 
           if (state is WellbeingLoadedState) {
@@ -61,54 +62,126 @@ class _DigitalWellbeingPageState extends State<DigitalWellbeingPage> {
               onRefresh: () async {
                 context.read<DigitalWellbeingBloc>().add(LoadUsageStatsEvent());
               },
-              child: ListView(
-                padding: const EdgeInsets.all(16.0),
-                children: [
-                  // 1. Resumen de tiempo de pantalla total
-                  Card(
-                    elevation: 0,
-                    color: theme.colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Tiempo de pantalla hoy',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: theme.colorScheme.onPrimaryContainer,
-                            ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 960),
+                  child: ListView(
+                    padding: const EdgeInsets.all(16.0),
+                    children: [
+                      // 1. Resumen de tiempo de pantalla total
+                      Card(
+                        elevation: 0,
+                        color: theme.colorScheme.primaryContainer,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            children: [
+                              Text(
+                                'Tiempo de pantalla hoy',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: theme.colorScheme.onPrimaryContainer,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _formatMinutes(state.totalScreenTimeMinutes),
+                                style: theme.textTheme.displayMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.onPrimaryContainer,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _formatMinutes(state.totalScreenTimeMinutes),
-                            style: theme.textTheme.displayMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                  Text(
-                    'Límites de Aplicaciones',
-                    style: theme.textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
+                      Text(
+                        'Límites de Aplicaciones',
+                        style: theme.textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 12),
 
-                  // 2. Lista de aplicaciones y controles de límite
-                  ...state.appUsages
-                      .map((usage) => _buildAppLimitTile(context, usage)),
-                ],
+                      if (state.appUsages.isEmpty)
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              children: [
+                                Icon(Icons.hourglass_empty,
+                                    size: 48,
+                                    color: theme.colorScheme.onSurfaceVariant),
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'Sin aplicaciones registradas todavía',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  'Cuando registres uso o límites de aplicaciones aparecerán aquí.',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            if (constraints.maxWidth >= 700) {
+                              final itemWidth = (constraints.maxWidth - 16) / 2;
+                              return Wrap(
+                                spacing: 16,
+                                runSpacing: 12,
+                                children: state.appUsages
+                                    .map((usage) => SizedBox(
+                                          width: itemWidth,
+                                          child: _buildAppLimitTile(
+                                              context, usage),
+                                        ))
+                                    .toList(),
+                              );
+                            }
+                            return Column(
+                              children: state.appUsages
+                                  .map((usage) =>
+                                      _buildAppLimitTile(context, usage))
+                                  .toList(),
+                            );
+                          },
+                        ),
+                    ],
+                  ),
+                ),
               ),
             );
           }
 
           return const SizedBox();
         },
+      ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton() {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 960),
+        child: ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: const [
+            SkeletonBox(
+                height: 120,
+                borderRadius: BorderRadius.all(Radius.circular(12))),
+            SizedBox(height: 24),
+            SkeletonBox(width: 220, height: 22),
+            SizedBox(height: 12),
+            DashboardCardSkeleton(),
+            SizedBox(height: 12),
+            DashboardCardSkeleton(),
+          ],
+        ),
       ),
     );
   }

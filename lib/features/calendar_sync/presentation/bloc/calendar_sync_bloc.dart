@@ -1,6 +1,7 @@
 // lib/features/calendar_sync/presentation/bloc/calendar_sync_bloc.dart
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:focus_wellbeing_app/core/network/google_calendar_exceptions.dart';
 import 'package:focus_wellbeing_app/features/calendar_sync/data/repositories/calendar_sync_repository.dart';
 import 'calendar_sync_event.dart';
 import 'calendar_sync_state.dart';
@@ -27,6 +28,8 @@ class CalendarSyncBloc extends Bloc<CalendarSyncEvent, CalendarSyncState> {
         preferredStart: event.preferredStart,
       );
       emit(ProposalGeneratedState(proposal));
+    } on CalendarAuthException catch (e) {
+      emit(CalendarSyncErrorState(e.message));
     } catch (e) {
       emit(CalendarSyncErrorState('Error al evaluar disponibilidad: $e'));
     }
@@ -43,6 +46,8 @@ class CalendarSyncBloc extends Bloc<CalendarSyncEvent, CalendarSyncState> {
         googleEventId: eventId,
         message: 'Bloque de tiempo agendado exitosamente en Google Calendar.',
       ));
+    } on CalendarAuthException catch (e) {
+      emit(CalendarSyncErrorState(e.message));
     } catch (e) {
       emit(CalendarSyncErrorState(
           'Error al crear el evento en el calendario: $e'));

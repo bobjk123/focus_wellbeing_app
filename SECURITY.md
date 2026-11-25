@@ -14,6 +14,19 @@ y la configuración de credenciales por plataforma siguen siendo
 experimentales; no incluyas secretos OAuth, client secrets ni tokens en el
 repositorio.
 
+## Modelo de privacidad y cifrado local
+
+1. **Cero telemetría externa**: Las sesiones Pomodoro, árboles plantados, estadísticas de uso y recomendaciones de descanso (`SlmEngine`) se procesan y almacenan exclusivamente en el dispositivo.
+2. **Cifrado de base de datos (SQLCipher)**: `wellbeing.db` se abre con `PRAGMA cipher_compatibility = 4` y una clave AES-256 de 32 bytes generada mediante `Random.secure()`.
+3. **Resguardo de claves**: La clave maestra se guarda en el almacén seguro nativo de cada plataforma (`Android KeyStore`, `iOS Keychain`, `Windows DPAPI`) mediante `flutter_secure_storage`.
+4. **Permisos mínimos en la nube**: Google Calendar es opcional y solicita únicamente el scope `calendar.events`.
+
+## Migración de datos históricos
+
+- El prototipo inicial utilizó Isar como motor local; a partir de la migración a SQLite con SQLCipher, la aplicación crea un esquema relacional limpio (`user_tasks`, `pomodoro_sessions`, `plant_trees`, `calendar_events`, `usage_limits`).
+- No existe importación automática desde archivos `.isar` legados. Si se requiere conservar registros previos de prototipos anteriores, deben exportarse antes de actualizar o implementar un lector puntual de transición.
+- Futuros cambios de esquema en `wellbeing.db` deben gestionarse con migraciones versionadas mediante `PRAGMA user_version`.
+
 ## Reportar una vulnerabilidad
 
 No abras un issue público para una vulnerabilidad. Usa la función privada

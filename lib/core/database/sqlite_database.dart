@@ -16,11 +16,13 @@ class SqliteDatabase {
 
   static Future<SqliteDatabase> open({
     EncryptionService? encryptionService,
+    String? directoryPath,
   }) async {
-    final directory = await getApplicationDocumentsDirectory();
+    final basePath =
+        directoryPath ?? (await getApplicationDocumentsDirectory()).path;
     final key = await (encryptionService ?? EncryptionService())
         .getOrCreateEncryptionKey();
-    final database = sqlite3.open(join(directory.path, sqliteDatabaseName));
+    final database = sqlite3.open(join(basePath, sqliteDatabaseName));
     final password = base64Encode(key);
 
     // The key is base64, so it cannot contain SQL string delimiters.
@@ -131,6 +133,13 @@ class SqliteDatabase {
     );
   }
 
+  Future<List<PlantTree>> getPlantTrees() async {
+    final rows = _database.select(
+      'SELECT * FROM plant_trees ORDER BY planted_at DESC',
+    );
+    return rows.map(_plantTreeFromRow).toList();
+  }
+
   Future<void> close() async => _database.close();
 
   void _createSchema() {
@@ -198,6 +207,16 @@ class SqliteDatabase {
       )
     ''');
   }
+
+  static PlantTree _plantTreeFromRow(Row row) => PlantTree()
+    ..id = row['id'] as int
+    ..uuid = row['uuid'] as String
+    ..species = row['species'] as String
+    ..status = TreeStatus.values[row['status'] as int]
+    ..plantedAt = DateTime.fromMillisecondsSinceEpoch(row['planted_at'] as int)
+    ..growthDurationMinutes = row['growth_duration_minutes'] as int
+    ..associatedPomodoroSessionId =
+        row['associated_pomodoro_session_id'] as String?;
 
   static UsageLimit _usageLimitFromRow(Row row) => UsageLimit()
     ..id = row['id'] as int
