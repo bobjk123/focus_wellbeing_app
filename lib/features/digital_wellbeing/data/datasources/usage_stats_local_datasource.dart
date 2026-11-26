@@ -9,6 +9,7 @@ abstract class UsageStatsLocalDataSource {
     required String packageName,
     required String appName,
     required int limitMinutes,
+    int? currentUsageMinutes,
     bool? isBlocked,
   });
 }
@@ -28,6 +29,7 @@ class UsageStatsLocalDataSourceImpl implements UsageStatsLocalDataSource {
     required String packageName,
     required String appName,
     required int limitMinutes,
+    int? currentUsageMinutes,
     bool? isBlocked,
   }) async {
     final existingRecord = await database.findUsageLimit(packageName);
@@ -35,12 +37,15 @@ class UsageStatsLocalDataSourceImpl implements UsageStatsLocalDataSource {
       ..packageName = packageName
       ..appName = appName
       ..dailyLimitMinutes = limitMinutes
-      ..currentUsageMinutes = 0
+      ..currentUsageMinutes = currentUsageMinutes ?? 0
       ..isBlocked = false
       ..lastUpdated = DateTime.now();
 
     record.appName = appName;
     record.dailyLimitMinutes = limitMinutes;
+    if (currentUsageMinutes != null) {
+      record.currentUsageMinutes = currentUsageMinutes;
+    }
     if (isBlocked != null) {
       record.isBlocked = isBlocked;
     }

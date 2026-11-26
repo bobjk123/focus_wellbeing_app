@@ -80,7 +80,14 @@ existentes y se verificó su ejecución en Windows y Android:
   mientras que Gradle advierte sobre la futura migración de
   `workmanager_android` al Kotlin integrado y sobre el acceso nativo de Java.
 
-### Cambios recientes — 25 de noviembre de 2026
+### Cambios recientes — 26 de noviembre de 2026
+
+- **Estadísticas reales del sistema (`SystemUsageStatsService`)**: Se implementó el canal `com.wellbeing.focus_wellbeing_app/usage_stats` en Dart, Android (`UsageStatsManager` + `AppOpsManager` y permiso `PACKAGE_USAGE_STATS`) y Windows (Win32 `GetForegroundWindow` / `QueryFullProcessImageNameW`), sincronizando el uso real con `UsageRepositoryImpl`.
+- **Permisos en UI**: Se añadió la tarjeta de solicitud de acceso a estadísticas de uso en `DigitalWellbeingPage` para Android.
+- **Reportes semanales reales**: Se conectó `WeeklyReportsPage` a `SqliteDatabase.getWeeklyFocusMinutes()` y `getUsageLimits()`, eliminando los datos simulados y añadiendo skeletons y estado vacío.
+- **Pruebas**: Cobertura ampliada a `24/24` pruebas exitosas (`flutter analyze` limpio).
+
+### Cambios anteriores — 25 de noviembre de 2026
 
 - **UI/UX**: Se añadieron skeletons animados (`SkeletonBox`, `DashboardCardSkeleton`), adaptación responsive para móvil/escritorio (`NavigationBar` / `NavigationRail` y grillas adaptables) y estados vacíos para Google Calendar, Bosque Virtual y Bienestar Digital.
 - **Manejo de errores OAuth2 / Google Calendar**: Se incorporó `CalendarAuthException` para clasificar cancelaciones, errores de red, configuración OAuth2 faltante, plataformas no soportadas y permisos insuficientes (`401`/`403`).

@@ -1,7 +1,10 @@
 // lib/features/digital_wellbeing/presentation/pages/digital_wellbeing_page.dart
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:focus_wellbeing_app/core/wellbeing/system_usage_stats_service.dart';
+import 'package:focus_wellbeing_app/injection_container.dart' as di;
 
 import '../bloc/digital_wellbeing_bloc.dart';
 import '../bloc/digital_wellbeing_event.dart';
@@ -17,10 +20,23 @@ class DigitalWellbeingPage extends StatefulWidget {
 }
 
 class _DigitalWellbeingPageState extends State<DigitalWellbeingPage> {
+  bool _needsUsagePermission = false;
+
   @override
   void initState() {
     super.initState();
     context.read<DigitalWellbeingBloc>().add(LoadUsageStatsEvent());
+    _checkUsagePermission();
+  }
+
+  Future<void> _checkUsagePermission() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
+    if (!di.sl.isRegistered<SystemUsageStatsService>()) return;
+    final hasPermission =
+        await di.sl<SystemUsageStatsService>().hasUsagePermission();
+    if (mounted) {
+      setState(() => _needsUsagePermission = !hasPermission);
+    }
   }
 
   String _formatMinutes(int minutes) {
@@ -68,6 +84,35 @@ class _DigitalWellbeingPageState extends State<DigitalWellbeingPage> {
                   child: ListView(
                     padding: const EdgeInsets.all(16.0),
                     children: [
+                      if (_needsUsagePermission) ...[
+                        Card(
+                          color: theme.colorScheme.secondaryContainer,
+                          child: ListTile(
+                            leading: const Icon(Icons.privacy_tip_outlined),
+                            title: const Text(
+                              'Acceso a estadísticas de uso',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: const Text(
+                              'Concede permiso en Ajustes para leer el tiempo real de tus aplicaciones.',
+                            ),
+                            trailing: FilledButton.tonal(
+                              onPressed: () async {
+                                await di.sl<SystemUsageStatsService>()
+                                    .requestUsagePermission();
+                                await _checkUsagePermission();
+                                if (context.mounted) {
+                                  context
+                                      .read<DigitalWellbeingBloc>()
+                                      .add(LoadUsageStatsEvent());
+                                }
+                              },
+                              child: const Text('Permitir'),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       // 1. Resumen de tiempo de pantalla total
                       Card(
                         elevation: 0,

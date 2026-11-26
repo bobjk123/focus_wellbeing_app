@@ -140,6 +140,40 @@ class SqliteDatabase {
     return rows.map(_plantTreeFromRow).toList();
   }
 
+  /// Devuelve los minutos de enfoque exitosos de lunes a domingo de la semana actual.
+  Future<List<int>> getWeeklyFocusMinutes({DateTime? referenceDate}) async {
+    final now = referenceDate ?? DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final mondayStart =
+        todayStart.subtract(Duration(days: now.weekday - DateTime.monday));
+    final nextMondayStart = mondayStart.add(const Duration(days: 7));
+
+    final rows = _database.select(
+      '''
+      SELECT duration_minutes, start_time
+      FROM pomodoro_sessions
+      WHERE is_successful = 1
+        AND start_time >= ?
+        AND start_time < ?
+      ''',
+      [
+        mondayStart.millisecondsSinceEpoch,
+        nextMondayStart.millisecondsSinceEpoch,
+      ],
+    );
+
+    final dailyTotals = List<int>.filled(7, 0);
+    for (final row in rows) {
+      final startTime =
+          DateTime.fromMillisecondsSinceEpoch(row['start_time'] as int);
+      final dayIndex = startTime.weekday - DateTime.monday;
+      if (dayIndex >= 0 && dayIndex < 7) {
+        dailyTotals[dayIndex] += row['duration_minutes'] as int;
+      }
+    }
+    return dailyTotals;
+  }
+
   Future<void> close() async => _database.close();
 
   void _createSchema() {

@@ -7,6 +7,7 @@ import 'package:focus_wellbeing_app/features/focus_pomodoro/domain/usescases/com
 import 'package:get_it/get_it.dart';
 
 import 'core/database/sqlite_database.dart';
+import 'core/wellbeing/system_usage_stats_service.dart';
 import 'features/focus_pomodoro/data/datasources/calendar_remote_datasource.dart';
 import 'features/focus_pomodoro/data/datasources/pomodoro_local_datasource.dart';
 import 'features/focus_pomodoro/data/repositories/pomodoro_repository_impl.dart';
@@ -67,14 +68,21 @@ Future<void> initServiceLocator(
     ),
   );
 
-  // 1. Data Source de Bienestar Digital
+  // 1. Data Source y Servicio Nativo de Bienestar Digital
+  sl.registerLazySingleton<SystemUsageStatsService>(
+    () => SystemUsageStatsService(),
+  );
   sl.registerLazySingleton<UsageStatsLocalDataSource>(
     () => UsageStatsLocalDataSourceImpl(sl()),
   );
 
   // 2. Repositorio de Bienestar Digital
   sl.registerLazySingleton<UsageRepository>(
-    () => UsageRepositoryImpl(localDataSource: sl(), notificationService: sl()),
+    () => UsageRepositoryImpl(
+      localDataSource: sl(),
+      notificationService: sl(),
+      systemUsageService: sl(),
+    ),
   );
 
   // 3. Casos de Uso

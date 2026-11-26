@@ -74,6 +74,7 @@ void main() {
         final stats = await db2.getDailyForestStats();
         final trees = await db2.getPlantTrees();
         final limits = await db2.getUsageLimits();
+        final weeklyMinutes = await db2.getWeeklyFocusMinutes(referenceDate: now);
 
         expect(stats.treesPlanted, equals(1));
         expect(stats.focusMinutes, equals(25));
@@ -82,6 +83,8 @@ void main() {
         expect(limits.length, equals(1));
         expect(limits.first.packageName, equals('com.instagram.android'));
         expect(limits.first.dailyLimitMinutes, equals(30));
+        expect(weeklyMinutes.length, equals(7));
+        expect(weeklyMinutes[now.weekday - DateTime.monday], equals(25));
 
         await db2.close();
         expect(File(p.join(tempDir.path, sqliteDatabaseName)).existsSync(),
